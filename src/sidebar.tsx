@@ -133,7 +133,7 @@ const Sidebar: React.FC<{
   function decodeTimeInUrl(url: string): string {
     return url.replace(
       /([?&]time=)([^&]+)/,
-      (match, p1, p2) => p1 + decodeURIComponent(p2)
+      (/* match, */ p1, p2) => p1 + decodeURIComponent(p2)
     );
   }
 
