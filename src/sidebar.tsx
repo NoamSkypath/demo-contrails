@@ -129,12 +129,20 @@ const Sidebar: React.FC<{
   // Calculate percentage
   const coveragePercent = (totalAreaKm2 / EARTH_SURFACE_KM2) * 100;
 
-  // Helper to decode the time param in a URL for display
-  function decodeTimeInUrl(url: string): string {
-    return url.replace(
-      /([?&]time=)([^&]+)/,
-      (/* match, */ p1, p2) => p1 + decodeURIComponent(p2)
-    );
+  // Helper to remove duplicate time params from a URL (keep only the first)
+  function cleanUrl(url: string): string {
+    const [base, query] = url.split('?');
+    if (!query) return url;
+    const params = new URLSearchParams(query);
+    const seen = new Set<string>();
+    const cleaned: string[] = [];
+    for (const [key, value] of params.entries()) {
+      if (!seen.has(key)) {
+        cleaned.push(`${key}=${value}`);
+        seen.add(key);
+      }
+    }
+    return `${base}?${cleaned.join('&')}`;
   }
 
   // Helper to extract date and hour from filters.time (in UTC)
@@ -280,6 +288,7 @@ const Sidebar: React.FC<{
               multiple
               value={filters.flightLevel.split(',')}
               onChange={handleChange}
+              onBlur={() => handleInputBlur()}
               style={{
                 width: '100%',
                 padding: 5,
@@ -409,7 +418,7 @@ const Sidebar: React.FC<{
               <strong>Response size:</strong> {formatBytes(meta.responseSize)}
             </div>
             <div>
-              <strong>URL:</strong> {decodeTimeInUrl(meta.url)}
+              <strong>URL:</strong> {cleanUrl(meta.url)}
             </div>
           </div>
         )}
